@@ -1,0 +1,199 @@
+### RotaLog - API Entregas - HTTP Requests para testes
+### Usar com REST Client (VS Code) ou similar
+
+### ===========================================
+### HEALTH CHECK
+### ===========================================
+
+### Health Check
+GET http://localhost:3000/api/health
+
+### ===========================================
+### ENTREGAS - CRUD
+### ===========================================
+
+### Listar todas as entregas
+GET http://localhost:3000/api/entregas
+
+### Listar entregas por status
+GET http://localhost:3000/api/entregas?status=PENDENTE
+
+### Listar entregas por veículo (usado pelo api-frotas)
+GET http://localhost:3000/api/entregas?veiculo=ABC1D23
+
+### Listar entregas por motorista
+GET http://localhost:3000/api/entregas?motorista_id=1
+
+### Buscar entrega por ID
+GET http://localhost:3000/api/entregas/1
+
+### Buscar entrega por número do pedido
+GET http://localhost:3000/api/entregas/pedido/PED-2024-001
+
+### Estatísticas de entregas
+GET http://localhost:3000/api/entregas/stats
+
+### Criar nova entrega
+POST http://localhost:3000/api/entregas
+Content-Type: application/json
+
+{
+    "origem_endereco": "Rua Augusta, 1500 - São Paulo, SP",
+    "destino_endereco": "Av. Paulista, 2000 - São Paulo, SP",
+    "origem_lat": -23.5558,
+    "origem_lng": -46.6622,
+    "destino_lat": -23.5631,
+    "destino_lng": -46.6565,
+    "peso_kg": 25.5,
+    "observacoes": "Entrega urgente - horário comercial"
+}
+
+### Atualizar entrega
+PUT http://localhost:3000/api/entregas/1
+Content-Type: application/json
+
+{
+    "destino_endereco": "Rua Oscar Freire, 500 - São Paulo, SP",
+    "peso_kg": 30.0,
+    "observacoes": "Endereço atualizado pelo cliente"
+}
+
+### Atribuir veículo e motorista à entrega
+PATCH http://localhost:3000/api/entregas/5/atribuir
+Content-Type: application/json
+
+{
+    "veiculo_placa": "ABC1D23",
+    "motorista_id": 1
+}
+
+### Atualizar status para EM_TRANSITO
+PATCH http://localhost:3000/api/entregas/5/status
+Content-Type: application/json
+
+{
+    "status": "EM_TRANSITO"
+}
+
+### Atualizar status para ENTREGUE
+PATCH http://localhost:3000/api/entregas/5/status
+Content-Type: application/json
+
+{
+    "status": "ENTREGUE"
+}
+
+### Cancelar entrega (soft delete)
+DELETE http://localhost:3000/api/entregas/6
+
+### ===========================================
+### RASTREAMENTO
+### ===========================================
+
+### Listar eventos de rastreamento de uma entrega
+GET http://localhost:3000/api/rastreamento/1
+
+### Último evento de rastreamento
+GET http://localhost:3000/api/rastreamento/1/ultimo
+
+### Rastreamento público por número do pedido
+GET http://localhost:3000/api/rastreamento/pedido/PED-2024-003
+
+### Registrar evento de rastreamento (posição GPS)
+POST http://localhost:3000/api/rastreamento/3
+Content-Type: application/json
+
+{
+    "latitude": -23.5700,
+    "longitude": -46.6750,
+    "evento": "POSICAO_ATUALIZADA",
+    "descricao": "Em trânsito - Av. Faria Lima, próximo ao Shopping"
+}
+
+### Registrar evento de rastreamento (parada)
+POST http://localhost:3000/api/rastreamento/3
+Content-Type: application/json
+
+{
+    "latitude": -23.5874,
+    "longitude": -46.6814,
+    "evento": "PARADA_REALIZADA",
+    "descricao": "Parada para descarga no destino"
+}
+
+### ===========================================
+### INTEGRAÇÃO COM API-FROTAS
+### ===========================================
+
+### Listar veículos disponíveis (proxy para api-frotas)
+GET http://localhost:3000/api/frotas/veiculos/disponiveis
+
+### Buscar veículo por placa (proxy para api-frotas)
+GET http://localhost:3000/api/frotas/veiculos/ABC1D23
+
+### Verificar disponibilidade de veículo
+GET http://localhost:3000/api/frotas/veiculos/ABC1D23/disponibilidade
+
+### Buscar motorista por ID (proxy para api-frotas)
+GET http://localhost:3000/api/frotas/motoristas/1
+
+### ===========================================
+### FLUXO COMPLETO DE ENTREGA
+### ===========================================
+
+### 1. Criar nova entrega
+POST http://localhost:3000/api/entregas
+Content-Type: application/json
+
+{
+    "origem_endereco": "Rua Haddock Lobo, 595 - Cerqueira César, São Paulo",
+    "destino_endereco": "Av. Eng. Luís Carlos Berrini, 1376 - Brooklin, São Paulo",
+    "origem_lat": -23.5560,
+    "origem_lng": -46.6680,
+    "destino_lat": -23.6010,
+    "destino_lng": -46.6920,
+    "peso_kg": 12.0,
+    "observacoes": "Teste de fluxo completo"
+}
+
+### 2. Verificar disponibilidade do veículo
+GET http://localhost:3000/api/frotas/veiculos/NOP3Q45/disponibilidade
+
+### 3. Atribuir veículo e motorista (substituir ID da entrega criada)
+PATCH http://localhost:3000/api/entregas/11/atribuir
+Content-Type: application/json
+
+{
+    "veiculo_placa": "NOP3Q45",
+    "motorista_id": 5
+}
+
+### 4. Iniciar trânsito
+PATCH http://localhost:3000/api/entregas/11/status
+Content-Type: application/json
+
+{
+    "status": "EM_TRANSITO"
+}
+
+### 5. Registrar posição GPS durante trânsito
+POST http://localhost:3000/api/rastreamento/11
+Content-Type: application/json
+
+{
+    "latitude": -23.5700,
+    "longitude": -46.6800,
+    "evento": "POSICAO_ATUALIZADA",
+    "descricao": "Em trânsito - Av. Rebouças"
+}
+
+### 6. Concluir entrega
+PATCH http://localhost:3000/api/entregas/11/status
+Content-Type: application/json
+
+{
+    "status": "ENTREGUE"
+}
+
+### 7. Verificar rastreamento completo
+GET http://localhost:3000/api/rastreamento/11
