@@ -10,7 +10,8 @@ import java.util.Map;
 
 @Slf4j
 @RestControllerAdvice
-public class GlobalExceptionHandler {
+public class
+GlobalExceptionHandler {
 
 	@ExceptionHandler(ResourceNotFoundException.class)
 	public ResponseEntity<Map<String, String>> handleResourceNotFound(ResourceNotFoundException ex) {
