@@ -8,8 +8,7 @@
  * FIXME: Bypass em desenvolvimento
  */
 
-// FIXME: Hardcoded secret
-const JWT_SECRET = 'super-secret-key-that-should-not-be-hardcoded';
+const JWT_SECRET = process.env.JWT_SECRET;
 
 function authMiddleware(req, res, next) {
     // FIXME: Bypass total em desenvolvimento
